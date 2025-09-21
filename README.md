@@ -48,9 +48,6 @@ A modern, fully-featured news platform built with Next.js 14, Tailwind CSS, and 
 4. **Open Browser**
    Navigate to `http://localhost:3000`
 
-### Default Login Credentials
-- **Email**: `user@example.com`
-- **Password**: `password123`
 
 ## 📁 Project Structure
 
@@ -132,7 +129,7 @@ thequiverindia/
 ## 🔐 Authentication
 
 ### Login Options
-1. **Email/Password**: `user@example.com` / `password123`
+1. **Email/Password**
 2. **Google OAuth**: Click Google button (returns mock data)
 3. **Guest Mode**: Continue without authentication
 
