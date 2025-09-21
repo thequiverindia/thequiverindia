@@ -1,0 +1,8 @@
+{
+  "/page": "app/page.js",
+  "/weather/page": "app/weather/page.js",
+  "/category/[slug]/page": "app/category/[slug]/page.js",
+  "/article/[slug]/page": "app/article/[slug]/page.js",
+  "/search/page": "app/search/page.js",
+  "/not-found": "app/not-found.js"
+}
