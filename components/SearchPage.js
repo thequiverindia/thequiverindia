@@ -6,18 +6,10 @@ import Header from './Header'
 import Footer from './Footer'
 import ArticleCard from './ArticleCard'
 import { searchArticles, fetchTrendingTopics } from '../lib/data'
+import { SEARCH_SUGGESTIONS, POPULAR_SEARCH_TOPICS } from '../lib/constants'
 
 const SearchSuggestions = ({ onSelect }) => {
-  const suggestions = [
-    '🇮🇳 Modi Digital India',
-    '🏏 Cricket World Cup',
-    '💰 Stock Market Today',
-    '🎬 Bollywood News',
-    '🌍 International Affairs',
-    '🔬 Science Technology',
-    '🏥 Health Updates',
-    '🌾 Agriculture Policy'
-  ]
+  const suggestions = SEARCH_SUGGESTIONS
 
   return (
     <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-b-lg shadow-lg z-10">
@@ -325,7 +317,7 @@ export default function SearchPage({ initialQuery, searchResults: initialResults
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Links</h3>
                   <div className="space-y-2">
-                    {['National News', 'Cricket Updates', 'Bollywood Gossip', 'Stock Market', 'Weather Forecast'].map(link => (
+                    {POPULAR_SEARCH_TOPICS.map(link => (
                       <button
                         key={link}
                         onClick={() => handleSuggestionSelect(link)}

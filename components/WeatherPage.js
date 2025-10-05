@@ -4,32 +4,13 @@ import { useState, useEffect } from 'react'
 import { fetchWeatherByCity } from '../lib/data'
 import Header from './Header'
 import Footer from './Footer'
+import { MAJOR_CITIES, WEATHER_ICONS } from '../lib/constants'
 
-const majorIndianCities = [
-  { name: 'New Delhi', key: 'delhi', state: 'Delhi' },
-  { name: 'Mumbai', key: 'mumbai', state: 'Maharashtra' },
-  { name: 'Bangalore', key: 'bangalore', state: 'Karnataka' },
-  { name: 'Chennai', key: 'chennai', state: 'Tamil Nadu' },
-  { name: 'Kolkata', key: 'kolkata', state: 'West Bengal' },
-  { name: 'Hyderabad', key: 'hyderabad', state: 'Telangana' },
-  { name: 'Pune', key: 'pune', state: 'Maharashtra' },
-  { name: 'Ahmedabad', key: 'ahmedabad', state: 'Gujarat' }
-]
-
-const weatherIcons = {
-  'sunny': '☀️',
-  'partly-cloudy': '⛅',
-  'cloudy': '☁️',
-  'rainy': '🌧️',
-  'stormy': '⛈️',
-  'humid': '🌫️',
-  'hot': '🥵',
-  'cold': '🥶'
-}
+const majorIndianCities = MAJOR_CITIES
 
 const getWeatherIcon = (condition) => {
   const key = condition.toLowerCase().replace(/\s+/g, '-')
-  return weatherIcons[key] || '🌤️'
+  return WEATHER_ICONS[key] || WEATHER_ICONS.default
 }
 
 const UVIndexBar = ({ uvIndex }) => {

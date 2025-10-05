@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import { formatDate } from '../lib/dateUtils'
 
 export default function ArticleCard({
   article,
@@ -87,19 +88,8 @@ export default function ArticleCard({
               <span className="font-medium">
                 {article.author}
               </span>
-              <time dateTime={article.published_at} title={new Date(article.published_at).toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-              })}>
-                {new Date(article.published_at).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric'
-                })}
+              <time dateTime={article.published_at} title={formatDate(article.published_at)}>
+                {formatDate(article.published_at)}
               </time>
             </div>
 

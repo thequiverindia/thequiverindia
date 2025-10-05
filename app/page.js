@@ -1,10 +1,9 @@
 import Header from '../components/Header'
-import HeroCarousel from '../components/HeroCarousel'
-import BreakingTicker from '../components/BreakingTicker'
 import ArticleCard from '../components/ArticleCard'
-import WidgetPanel from '../components/WidgetPanel'
+import StaticWidgetPanel from '../components/StaticWidgetPanel'
 import SidebarAdSlot from '../components/SidebarAdSlot'
 import Footer from '../components/Footer'
+import { DynamicHeroCarousel, DynamicBreakingTicker, DynamicWidgetPanel } from '../components/DynamicComponents'
 import { fetchFeaturedArticles, fetchBreakingNews } from '../lib/data'
 
 export default async function HomePage() {
@@ -17,7 +16,7 @@ export default async function HomePage() {
 
       <main className="flex-1">
         {/* Breaking News Ticker */}
-        <BreakingTicker newsItems={breakingNews} />
+        <DynamicBreakingTicker newsItems={breakingNews} />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -25,7 +24,7 @@ export default async function HomePage() {
             <div className="lg:col-span-3">
               {/* Hero Carousel */}
               <section className="mb-12">
-                <HeroCarousel articles={featuredArticles.slice(0, 5)} />
+                <DynamicHeroCarousel articles={featuredArticles.slice(0, 5)} />
               </section>
 
               {/* Featured Articles Grid */}
@@ -34,9 +33,10 @@ export default async function HomePage() {
                   <h2 className="text-2xl font-bold text-gray-900">Featured Stories</h2>
                   <a
                     href="/featured"
-                    className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                    className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
                   >
-                    View All →
+                    <span className="mr-1">⭐</span>
+                    View All Featured →
                   </a>
                 </div>
 
@@ -77,7 +77,7 @@ export default async function HomePage() {
             <aside className="lg:col-span-1">
               <div className="sticky top-8 space-y-6">
                 {/* Weather Widget */}
-                <WidgetPanel
+                <DynamicWidgetPanel
                   widgets={[
                     {
                       id: 'weather',
@@ -90,7 +90,7 @@ export default async function HomePage() {
                 />
 
                 {/* Live Updates */}
-                <WidgetPanel
+                <DynamicWidgetPanel
                   widgets={[
                     {
                       id: 'live-updates',
@@ -102,7 +102,7 @@ export default async function HomePage() {
                 />
 
                 {/* Trending Topics */}
-                <WidgetPanel
+                <DynamicWidgetPanel
                   widgets={[
                     {
                       id: 'trending',
@@ -114,7 +114,7 @@ export default async function HomePage() {
                 />
 
                 {/* Stock Market */}
-                <WidgetPanel
+                <DynamicWidgetPanel
                   widgets={[
                     {
                       id: 'stock-market',
@@ -126,7 +126,7 @@ export default async function HomePage() {
                 />
 
                 {/* Popular Articles */}
-                <WidgetPanel
+                <DynamicWidgetPanel
                   widgets={[
                     {
                       id: 'popular',
@@ -138,7 +138,7 @@ export default async function HomePage() {
                 />
 
                 {/* Newsletter Signup */}
-                <WidgetPanel
+                <StaticWidgetPanel
                   widgets={[
                     {
                       id: 'newsletter',

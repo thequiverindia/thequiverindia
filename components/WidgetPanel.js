@@ -9,6 +9,7 @@ import {
   fetchWeatherByCity,
   fetchPopularArticles
 } from '../lib/data'
+import { formatTime } from '../lib/dateUtils'
 
 export default function WidgetPanel({
   widgets = [],
@@ -19,8 +20,12 @@ export default function WidgetPanel({
   const [collapsedWidgets, setCollapsedWidgets] = useState(new Set())
   const [widgetData, setWidgetData] = useState({})
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    // Set mounted flag first
+    setMounted(true)
+    
     const loadWidgetData = async () => {
       setLoading(true)
       const data = {}
@@ -75,7 +80,7 @@ export default function WidgetPanel({
   }
 
   const renderWidgetContent = (widget) => {
-    if (loading) {
+    if (!mounted || loading) {
       return (
         <div className="flex items-center justify-center p-8">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
@@ -180,7 +185,7 @@ export default function WidgetPanel({
               </div>
             </div>
             <div className="text-xs text-gray-500 text-center">
-              Last updated: {new Date(stocks.lastUpdated).toLocaleTimeString()}
+              Last updated: {formatTime(stocks.lastUpdated)}
             </div>
           </div>
         )

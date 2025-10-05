@@ -6,18 +6,10 @@ import Header from './Header'
 import Footer from './Footer'
 import ArticleCard from './ArticleCard'
 import WidgetPanel from './WidgetPanel'
+import { SORT_OPTIONS, VIEW_MODES, CATEGORY_ICONS } from '../lib/constants'
 
-const sortOptions = [
-  { value: 'latest', label: 'Latest First' },
-  { value: 'oldest', label: 'Oldest First' },
-  { value: 'popular', label: 'Most Popular' },
-  { value: 'trending', label: 'Trending' }
-]
-
-const viewModes = [
-  { value: 'grid', label: 'Grid View', icon: '⊞' },
-  { value: 'list', label: 'List View', icon: '☰' }
-]
+const sortOptions = SORT_OPTIONS.articles
+const viewModes = VIEW_MODES.slice(0, 2) // Only grid and list for category page
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const getPageNumbers = () => {
@@ -123,19 +115,7 @@ export default function CategoryPage({ category, articlesData, currentPage }) {
   }
 
   const getCategoryIcon = (categoryName) => {
-    const icons = {
-      'National': '🇮🇳',
-      'Cricket': '🏏',
-      'Bollywood': '🎬',
-      'Economy': '💰',
-      'Regional': '🗺️',
-      'Science': '🔬',
-      'Defence': '🛡️',
-      'Culture': '🎭',
-      'Health': '🏥',
-      'World': '🌍'
-    }
-    return icons[categoryName] || '📰'
+    return CATEGORY_ICONS[categoryName] || '📰'
   }
 
   return (

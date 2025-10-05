@@ -1,5 +1,5 @@
 import { fetchArticleBySlug, fetchRelatedArticles } from '../../../lib/data'
-import ArticleDetailPage from '../../../components/ArticleDetailPage'
+import { DynamicArticleDetailPage } from '../../../components/DynamicComponents'
 import { notFound } from 'next/navigation'
 
 export async function generateMetadata({ params }) {
@@ -43,7 +43,7 @@ export default async function ArticlePage({ params }) {
     const relatedArticles = await fetchRelatedArticles(articleData.article.id)
 
     return (
-      <ArticleDetailPage 
+      <DynamicArticleDetailPage 
         article={articleData.article}
         authorInfo={articleData.author_info}
         relatedArticles={relatedArticles}

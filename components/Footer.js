@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { getCurrentYear } from '../lib/dateUtils'
+import { SITE_CONFIG, FOOTER_LINKS, SOCIAL_LINKS } from '../lib/constants'
 
 export default function Footer({
   showSocial = true,
@@ -6,23 +8,15 @@ export default function Footer({
   legalLinks = [],
   socialLinks = []
 }) {
-  const currentYear = new Date().getFullYear()
-
-  const defaultLegalLinks = [
-    { href: '/about', label: 'About Us' },
-    { href: '/contact', label: 'Contact' },
-    { href: '/privacy', label: 'Privacy Policy' },
-    { href: '/terms', label: 'Terms of Service' },
-    { href: '/advertise', label: 'Advertise' }
-  ]
+  const currentYear = getCurrentYear()
 
   const defaultSocialLinks = [
-    { href: 'https://twitter.com/thequiver', label: 'Twitter', icon: 'twitter' },
-    { href: 'https://facebook.com/thequiver', label: 'Facebook', icon: 'facebook' },
-    { href: 'https://instagram.com/thequiver', label: 'Instagram', icon: 'instagram' }
+    { href: SOCIAL_LINKS.twitter, label: 'Twitter', icon: 'twitter' },
+    { href: SOCIAL_LINKS.facebook, label: 'Facebook', icon: 'facebook' },
+    { href: SOCIAL_LINKS.instagram, label: 'Instagram', icon: 'instagram' }
   ]
 
-  const linksToShow = legalLinks.length > 0 ? legalLinks : defaultLegalLinks
+  const linksToShow = legalLinks.length > 0 ? legalLinks : FOOTER_LINKS.legal
   const socialToShow = socialLinks.length > 0 ? socialLinks : defaultSocialLinks
 
   return (
@@ -32,10 +26,10 @@ export default function Footer({
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-blue-400">The Quiver</span>
+              <span className="text-2xl font-bold text-blue-400">{SITE_CONFIG.name}</span>
             </Link>
             <p className="mt-4 text-gray-300 text-sm leading-relaxed">
-              Your trusted source for breaking news, in-depth analysis, and compelling stories from India and around the world.
+              {SITE_CONFIG.description}
             </p>
 
             {showSocial && (
@@ -77,11 +71,13 @@ export default function Footer({
           <div>
             <h3 className="text-sm font-semibold text-gray-200 mb-4">Categories</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/politics" className="text-gray-300 hover:text-blue-400 transition-colors">Politics</Link></li>
-              <li><Link href="/business" className="text-gray-300 hover:text-blue-400 transition-colors">Business</Link></li>
-              <li><Link href="/technology" className="text-gray-300 hover:text-blue-400 transition-colors">Technology</Link></li>
-              <li><Link href="/sports" className="text-gray-300 hover:text-blue-400 transition-colors">Sports</Link></li>
-              <li><Link href="/world" className="text-gray-300 hover:text-blue-400 transition-colors">World</Link></li>
+              {FOOTER_LINKS.categories.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-gray-300 hover:text-blue-400 transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -128,15 +124,14 @@ export default function Footer({
         <div className="mt-8 pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © {currentYear} The Quiver. All rights reserved.
+              © {currentYear} {SITE_CONFIG.name}. All rights reserved.
             </p>
             <div className="mt-4 md:mt-0 flex space-x-6 text-sm">
-              <Link href="/sitemap" className="text-gray-400 hover:text-blue-400 transition-colors">
-                Sitemap
-              </Link>
-              <Link href="/rss" className="text-gray-400 hover:text-blue-400 transition-colors">
-                RSS
-              </Link>
+              {FOOTER_LINKS.quickLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="text-gray-400 hover:text-blue-400 transition-colors">
+                  {link.label}
+                </Link>
+              ))}
             </div>
           </div>
         </div>

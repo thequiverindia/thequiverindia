@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { formatTime } from '../lib/dateUtils'
 
 export default function BreakingTicker({
   newsItems = [],
@@ -77,10 +78,7 @@ export default function BreakingTicker({
                 className="text-xs text-gray-500"
                 dateTime={currentItem.published_at}
               >
-                {new Date(currentItem.published_at).toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
+                {formatTime(currentItem.published_at)}
               </time>
             </div>
           )}
