@@ -7,6 +7,7 @@ import Header from './Header'
 import Footer from './Footer'
 import ArticleCard from './ArticleCard'
 import WidgetPanel from './WidgetPanel'
+import OptimizedImage from './OptimizedImage'
 import { useClientSide } from '../lib/hooks'
 import { formatDate, formatTime } from '../lib/dateUtils'
 import { SHARE_PLATFORMS, STORAGE_KEYS, SUCCESS_MESSAGES, SOCIAL_PLATFORMS } from '../lib/constants'
@@ -197,7 +198,7 @@ export default function ArticleDetailPage({ article, authorInfo, relatedArticles
   }, [article.id, isClientSide])
 
   // Handle like functionality
-  const handleLike = () => {
+  const handleLike = async () => {
     if (typeof window === 'undefined') return
     
     const likedArticles = JSON.parse(localStorage.getItem(STORAGE_KEYS.likedArticles) || '[]')
@@ -208,12 +209,28 @@ export default function ArticleDetailPage({ article, authorInfo, relatedArticles
       localStorage.setItem(STORAGE_KEYS.likedArticles, JSON.stringify(updatedLiked))
       setIsLiked(false)
       setLikeCount(prev => prev - 1)
+      
+      // Track unlike in backend
+      try {
+        const { articlesAPI } = await import('../lib/api')
+        await articlesAPI.toggleLike(article.id, 'unlike')
+      } catch (error) {
+        console.error('Error tracking unlike:', error)
+      }
     } else {
       // Like
       likedArticles.push(article.id)
       localStorage.setItem(STORAGE_KEYS.likedArticles, JSON.stringify(likedArticles))
       setIsLiked(true)
       setLikeCount(prev => prev + 1)
+      
+      // Track like in backend
+      try {
+        const { articlesAPI } = await import('../lib/api')
+        await articlesAPI.toggleLike(article.id, 'like')
+      } catch (error) {
+        console.error('Error tracking like:', error)
+      }
     }
   }
 
@@ -285,7 +302,7 @@ export default function ArticleDetailPage({ article, authorInfo, relatedArticles
   }
 
 
-  const handleShare = (platform) => {
+  const handleShare = async (platform) => {
     // Only run on client side
     if (typeof window === 'undefined') return
     
@@ -303,6 +320,15 @@ export default function ArticleDetailPage({ article, authorInfo, relatedArticles
 
     if (shareUrls[platform]) {
       window.open(shareUrls[platform], '_blank', 'width=600,height=400')
+      
+      // Track share in backend
+      try {
+        const { articlesAPI } = await import('../lib/api')
+        await articlesAPI.incrementShares(article.id)
+      } catch (error) {
+        console.error('Error tracking share:', error)
+        // Non-critical error, don't show to user
+      }
     }
   }
 
@@ -485,7 +511,7 @@ export default function ArticleDetailPage({ article, authorInfo, relatedArticles
               {/* Featured Image */}
               {article.image && (
                 <div className="relative aspect-video">
-                  <Image
+                  <OptimizedImage
                     src={article.image.src}
                     alt={article.image.alt}
                     fill

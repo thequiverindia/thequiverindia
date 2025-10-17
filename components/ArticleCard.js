@@ -1,9 +1,9 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { formatDate } from '../lib/dateUtils'
+import OptimizedImage from './OptimizedImage'
 
 export default function ArticleCard({
   article,
@@ -57,7 +57,7 @@ export default function ArticleCard({
         <div className="flex gap-4">
           {showImage && article.image && (
             <div className={`flex-shrink-0 relative overflow-hidden rounded-lg bg-gray-100 ${classes.image}`}>
-              <Image
+              <OptimizedImage
                 src={article.image.src}
                 alt={article.image.alt}
                 fill

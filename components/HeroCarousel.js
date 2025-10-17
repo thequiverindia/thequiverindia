@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { formatDate } from '../lib/dateUtils'
+import OptimizedImage from './OptimizedImage'
 
 export default function HeroCarousel({ articles = [] }) {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -65,7 +65,7 @@ export default function HeroCarousel({ articles = [] }) {
             >
               {/* Background image */}
               <div className="absolute inset-0">
-                <Image
+                <OptimizedImage
                   src={article.image?.src || article.image || '/api/placeholder/800/500'}
                   alt={article.image?.alt || article.title}
                   fill
