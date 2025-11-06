@@ -1,0 +1,23 @@
+# robots.txt for The Quiver India
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /login
+Disallow: /signup
+
+# Sitemap location
+Sitemap: https://thequiverindia.com/sitemap.xml
+
+# Crawl-delay (optional, adjust if needed)
+Crawl-delay: 1
+
+# Google-specific
+User-agent: Googlebot
+Allow: /
+
+# Bing-specific
+User-agent: Bingbot
+Allow: /
+

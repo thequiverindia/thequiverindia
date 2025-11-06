@@ -1,4 +1,5 @@
 import User from '../models/User.model.js'
+import jwt from 'jsonwebtoken'
 
 // @desc    Register new user
 // @route   POST /api/v1/auth/register
@@ -77,6 +78,22 @@ export const login = async (req, res, next) => {
     const isPasswordMatch = await user.comparePassword(password)
 
     if (!isPasswordMatch) {
+      // Track failed login attempt
+      const failedLoginRecord = {
+        loginTime: new Date(),
+        ipAddress: req.ip || req.connection.remoteAddress,
+        userAgent: req.headers['user-agent'],
+        success: false
+      }
+      
+      if (!user.loginHistory) {
+        user.loginHistory = []
+      }
+      user.loginHistory.unshift(failedLoginRecord)
+      if (user.loginHistory.length > 50) {
+        user.loginHistory = user.loginHistory.slice(0, 50)
+      }
+      
       // Increment login attempts
       await user.incLoginAttempts()
       
@@ -93,11 +110,51 @@ export const login = async (req, res, next) => {
 
     // Update last login
     user.lastLogin = new Date()
-    await user.save({ validateBeforeSave: false })
+
+    // Track login history
+    const loginRecord = {
+      loginTime: new Date(),
+      ipAddress: req.ip || req.connection.remoteAddress,
+      userAgent: req.headers['user-agent'],
+      success: true
+    }
+    
+    // Keep only last 50 login records
+    if (!user.loginHistory) {
+      user.loginHistory = []
+    }
+    user.loginHistory.unshift(loginRecord)
+    if (user.loginHistory.length > 50) {
+      user.loginHistory = user.loginHistory.slice(0, 50)
+    }
 
     // Generate tokens
     const token = user.generateAuthToken()
     const refreshToken = user.generateRefreshToken()
+
+    // Track active session
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + 7) // 7 days expiry
+    
+    const sessionRecord = {
+      token: token.substring(token.length - 20), // Store last 20 chars for identification
+      createdAt: new Date(),
+      expiresAt: expiresAt,
+      ipAddress: req.ip || req.connection.remoteAddress,
+      userAgent: req.headers['user-agent'],
+      isActive: true
+    }
+    
+    // Keep only last 10 sessions
+    if (!user.sessions) {
+      user.sessions = []
+    }
+    user.sessions.unshift(sessionRecord)
+    if (user.sessions.length > 10) {
+      user.sessions = user.sessions.slice(0, 10)
+    }
+
+    await user.save({ validateBeforeSave: false })
 
     res.status(200).json({
       success: true,

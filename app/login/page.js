@@ -1,9 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { googleAuthStub } from '../../services/authStub'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
+
 export default function LoginPage() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -29,21 +34,38 @@ export default function LoginPage() {
     setErrors({})
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        localStorage.setItem('token', data.token)
-        window.location.href = '/'
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        // Store authentication data
+        localStorage.setItem('token', data.data.token)
+        if (data.data.refreshToken) {
+          localStorage.setItem('refreshToken', data.data.refreshToken)
+        }
+        if (data.data.user) {
+          localStorage.setItem('user', JSON.stringify(data.data.user))
+        }
+        
+        // Redirect to home page with a small delay to ensure storage is complete
+        setTimeout(() => {
+          router.push('/')
+          // Force reload to update header state
+          setTimeout(() => window.location.href = '/', 100)
+        }, 300)
       } else {
-        throw new Error('Login failed')
+        throw new Error(data.message || 'Login failed')
       }
     } catch (error) {
-      setErrors({ general: 'Invalid credentials. Please try again.' })
+      setErrors({ general: error.message || 'Invalid credentials. Please try again.' })
     } finally {
       setIsLoading(false)
     }
@@ -69,6 +91,19 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      {/* Back to Home Link */}
+      <div className="absolute top-4 left-4">
+        <Link 
+          href="/"
+          className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Home
+        </Link>
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
@@ -210,9 +245,9 @@ export default function LoginPage() {
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{' '}
-            <a href="/signup" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+            <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
               Sign up now
-            </a>
+            </Link>
           </p>
         </div>
       </div>

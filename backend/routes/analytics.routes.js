@@ -16,18 +16,40 @@ router.use(protect, authorize('admin'))
 router.get('/dashboard', async (req, res, next) => {
   try {
     const now = new Date()
-    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30))
+    const thirtyDaysAgo = new Date(now.getTime())
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const sevenDaysAgo = new Date(now.getTime())
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
     // Get counts
     const totalArticles = await Article.countDocuments()
     const publishedArticles = await Article.countDocuments({ status: 'published' })
     const draftArticles = await Article.countDocuments({ status: 'draft' })
     const totalUsers = await User.countDocuments()
+    const activeUsers = await User.countDocuments({ isActive: true })
+    const inactiveUsers = await User.countDocuments({ isActive: false })
+    const recentUsers = await User.countDocuments({
+      createdAt: { $gte: thirtyDaysAgo }
+    })
+    const activeInLast7Days = await User.countDocuments({
+      lastLogin: { $gte: sevenDaysAgo }
+    })
     const totalCategories = await Category.countDocuments()
     const activeAds = await Ad.countDocuments({ 
       isActive: true,
       'schedule.endDate': { $gte: new Date() }
     })
+
+    // Get users by role
+    const usersByRole = await User.aggregate([
+      {
+        $group: {
+          _id: '$role',
+          count: { $sum: 1 }
+        }
+      }
+    ])
 
     // Get recent articles
     const recentArticles = await Article.find()
@@ -133,12 +155,20 @@ router.get('/dashboard', async (req, res, next) => {
           publishedArticles,
           draftArticles,
           totalUsers,
+          activeUsers,
+          inactiveUsers,
+          recentUsers,
+          activeInLast7Days,
           totalCategories,
           activeAds,
           totalViews: articleStats[0]?.totalViews || 0,
           totalShares: articleStats[0]?.totalShares || 0,
           totalLikes: articleStats[0]?.totalLikes || 0
         },
+        usersByRole: usersByRole.reduce((acc, curr) => {
+          acc[curr._id] = curr.count
+          return acc
+        }, {}),
         recentArticles,
         articlesByCategory,
         recentActivity,

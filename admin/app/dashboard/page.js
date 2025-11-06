@@ -64,7 +64,7 @@ export default function Dashboard() {
             value={stats.totalArticles || 0}
             icon="📰"
             color="blue"
-            subtitle={`${stats.publishedArticles || 0} published`}
+            subtitle={`${stats.publishedArticles || 0} published, ${stats.draftArticles || 0} drafts`}
           />
           <StatCard
             title="Total Views"
@@ -78,7 +78,7 @@ export default function Dashboard() {
             value={stats.totalUsers || 0}
             icon="👥"
             color="purple"
-            subtitle="Registered users"
+            subtitle={`${stats.activeUsers || 0} active, ${stats.inactiveUsers || 0} inactive`}
           />
           <StatCard
             title="Active Ads"
@@ -87,6 +87,46 @@ export default function Dashboard() {
             color="orange"
             subtitle={`${stats.totalCategories || 0} categories`}
           />
+        </div>
+
+        {/* User Statistics Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-600">New Users (30 days)</h3>
+              <span className="text-2xl">👤</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{stats.recentUsers || 0}</div>
+            <p className="text-sm text-gray-500 mt-1">Recently joined</p>
+          </div>
+
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-600">Active Users (7 days)</h3>
+              <span className="text-2xl">🟢</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{stats.activeInLast7Days || 0}</div>
+            <p className="text-sm text-gray-500 mt-1">Logged in recently</p>
+          </div>
+
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-600">User Distribution</h3>
+              <span className="text-2xl">📊</span>
+            </div>
+            <div className="space-y-1 mt-2">
+              {analytics?.usersByRole && Object.keys(analytics.usersByRole).length > 0 ? (
+                Object.entries(analytics.usersByRole).map(([role, count]) => (
+                  <div key={role} className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600 capitalize">{role}:</span>
+                    <span className="font-semibold text-gray-900">{count}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No data</p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Charts Row */}

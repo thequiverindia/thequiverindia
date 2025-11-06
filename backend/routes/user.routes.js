@@ -174,4 +174,126 @@ router.delete('/:id', idValidation, async (req, res, next) => {
   }
 })
 
+// @desc    Get user statistics
+// @route   GET /api/v1/users/stats/overview
+// @access  Private (Admin)
+router.get('/stats/overview', async (req, res, next) => {
+  try {
+    // Total users by role
+    const usersByRole = await User.aggregate([
+      {
+        $group: {
+          _id: '$role',
+          count: { $sum: 1 }
+        }
+      }
+    ])
+
+    // Active vs Inactive users
+    const activeUsers = await User.countDocuments({ isActive: true })
+    const inactiveUsers = await User.countDocuments({ isActive: false })
+
+    // Recently joined users (last 30 days)
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    const recentUsers = await User.countDocuments({
+      createdAt: { $gte: thirtyDaysAgo }
+    })
+
+    // Users with recent activity (logged in within last 7 days)
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+    const activeInLast7Days = await User.countDocuments({
+      lastLogin: { $gte: sevenDaysAgo }
+    })
+
+    // Total users
+    const totalUsers = await User.countDocuments()
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalUsers,
+        activeUsers,
+        inactiveUsers,
+        recentUsers,
+        activeInLast7Days,
+        usersByRole: usersByRole.reduce((acc, curr) => {
+          acc[curr._id] = curr.count
+          return acc
+        }, {})
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+// @desc    Get user login history
+// @route   GET /api/v1/users/:id/login-history
+// @access  Private (Admin)
+router.get('/:id/login-history', idValidation, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select('name email loginHistory sessions lastLogin')
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        user: {
+          name: user.name,
+          email: user.email,
+          lastLogin: user.lastLogin
+        },
+        loginHistory: user.loginHistory || [],
+        sessions: user.sessions || []
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+// @desc    Revoke user session
+// @route   DELETE /api/v1/users/:id/sessions/:sessionIndex
+// @access  Private (Admin)
+router.delete('/:id/sessions/:sessionIndex', idValidation, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id)
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      })
+    }
+
+    const sessionIndex = parseInt(req.params.sessionIndex)
+    
+    if (user.sessions && user.sessions[sessionIndex]) {
+      user.sessions[sessionIndex].isActive = false
+      await user.save()
+
+      res.status(200).json({
+        success: true,
+        message: 'Session revoked successfully'
+      })
+    } else {
+      res.status(404).json({
+        success: false,
+        message: 'Session not found'
+      })
+    }
+  } catch (error) {
+    next(error)
+  }
+})
+
 export default router

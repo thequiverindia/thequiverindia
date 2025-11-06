@@ -69,7 +69,33 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  lockUntil: Date
+  lockUntil: Date,
+  loginHistory: [{
+    loginTime: {
+      type: Date,
+      default: Date.now
+    },
+    ipAddress: String,
+    userAgent: String,
+    success: {
+      type: Boolean,
+      default: true
+    }
+  }],
+  sessions: [{
+    token: String,
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    expiresAt: Date,
+    ipAddress: String,
+    userAgent: String,
+    isActive: {
+      type: Boolean,
+      default: true
+    }
+  }]
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

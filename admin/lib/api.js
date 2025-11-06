@@ -323,6 +323,23 @@ export const usersAPI = {
     // Clear cache after deleting a user
     clearCache()
     return result
+  },
+
+  async getStatistics() {
+    return apiRequest('/users/stats/overview')
+  },
+
+  async getLoginHistory(id) {
+    return apiRequest(`/users/${id}/login-history`)
+  },
+
+  async revokeSession(userId, sessionIndex) {
+    const result = await apiRequest(`/users/${userId}/sessions/${sessionIndex}`, {
+      method: 'DELETE'
+    })
+    // Clear cache after revoking a session
+    clearCache()
+    return result
   }
 }
 

@@ -103,22 +103,31 @@ export default function Header({
 
             {/* User Menu */}
             {isLoggedIn ? (
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-700">Hi, {userName}</span>
+              <div className="flex items-center space-x-3">
+                <div className="hidden sm:flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg">
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    {userName.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">Hi, {userName}</span>
+                </div>
                 <button
                   onClick={onLogout}
-                  className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium"
+                  className="text-gray-700 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors flex items-center space-x-1"
+                  title="Logout"
                 >
-                  Logout
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span className="hidden md:inline">Logout</span>
                 </button>
               </div>
             ) : (
-              <button
-                onClick={onLogin}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+              <Link
+                href="/login"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors inline-block"
               >
                 Login
-              </button>
+              </Link>
             )}
 
             {/* Mobile Menu Button */}
@@ -270,33 +279,39 @@ export default function Header({
                 {/* Login Section */}
                 <div className="p-3 mt-4">
                   {isLoggedIn ? (
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                          {userName.charAt(0).toUpperCase()}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                            {userName.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{userName}</div>
+                            <div className="text-xs text-gray-500">Logged in</div>
+                          </div>
                         </div>
-                        <span className="text-sm text-gray-700">{userName}</span>
                       </div>
                       <button
                         onClick={() => {
                           onLogout()
                           setIsMobileMenuOpen(false)
                         }}
-                        className="text-xs text-blue-600 hover:text-blue-800 font-medium px-2 py-1 rounded"
+                        className="w-full bg-red-600 text-white py-3 px-4 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
                       >
-                        Logout
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Logout</span>
                       </button>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => {
-                        onLogin()
-                        setIsMobileMenuOpen(false)
-                      }}
-                      className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                    <Link
+                      href="/login"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors block text-center"
                     >
                       Login to {SITE_CONFIG.name}
-                    </button>
+                    </Link>
                   )}
                 </div>
               </div>

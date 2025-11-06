@@ -1,23 +1,34 @@
-import Header from '../components/Header'
+import ClientHeader from '../components/ClientHeader'
 import ArticleCard from '../components/ArticleCard'
 import StaticWidgetPanel from '../components/StaticWidgetPanel'
 import SidebarAdSlot from '../components/SidebarAdSlot'
 import Footer from '../components/Footer'
-import { DynamicHeroCarousel, DynamicBreakingTicker, DynamicWidgetPanel } from '../components/DynamicComponents'
-import { fetchFeaturedArticles, fetchBreakingNews } from '../lib/data'
+import { DynamicHeroCarousel, DynamicWidgetPanel } from '../components/DynamicComponents'
+import { fetchFeaturedArticles } from '../lib/data'
+import { generateWebsiteStructuredData, generateOrganizationStructuredData } from '../lib/seo'
 
 export default async function HomePage() {
   const featuredArticles = await fetchFeaturedArticles()
-  const breakingNews = await fetchBreakingNews()
+
+  // Generate structured data for homepage
+  const websiteStructuredData = generateWebsiteStructuredData()
+  const organizationStructuredData = generateOrganizationStructuredData()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <Header />
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteStructuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationStructuredData) }}
+      />
+      
+      <ClientHeader />
 
       <main className="flex-1">
-        {/* Breaking News Ticker */}
-        <DynamicBreakingTicker newsItems={breakingNews} />
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Main Content */}

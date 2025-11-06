@@ -1,34 +1,12 @@
 import { fetchArticleBySlug, fetchRelatedArticles } from '../../../lib/data'
 import { DynamicArticleDetailPage } from '../../../components/DynamicComponents'
 import { notFound } from 'next/navigation'
+import { generateArticleMetadata, generateArticleStructuredData, generateBreadcrumbStructuredData } from '../../../lib/seo'
 
 export async function generateMetadata({ params }) {
   try {
-    const { article } = await fetchArticleBySlug(params.slug)
-    
-    return {
-      title: `${article.title} - TheQuiverIndia`,
-      description: article.excerpt,
-      openGraph: {
-        title: article.title,
-        description: article.excerpt,
-        type: 'article',
-        publishedTime: article.published_at,
-        authors: [article.author],
-        images: [
-          {
-            url: article.image?.src,
-            alt: article.image?.alt,
-          },
-        ],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title: article.title,
-        description: article.excerpt,
-        images: [article.image?.src],
-      },
-    }
+    const { article, author_info } = await fetchArticleBySlug(params.slug)
+    return generateArticleMetadata(article, author_info)
   } catch (error) {
     return {
       title: 'Article Not Found - TheQuiverIndia',
@@ -42,12 +20,38 @@ export default async function ArticlePage({ params }) {
     const articleData = await fetchArticleBySlug(params.slug)
     const relatedArticles = await fetchRelatedArticles(articleData.article.id)
 
+    // Generate structured data
+    const articleStructuredData = generateArticleStructuredData(
+      articleData.article, 
+      articleData.author_info
+    )
+    
+    // Generate breadcrumb structured data
+    const breadcrumbs = [
+      { name: 'Home', url: process.env.NEXT_PUBLIC_BASE_URL || 'https://thequiverindia.com' },
+      { name: articleData.article.category || 'Articles', url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://thequiverindia.com'}/category/${articleData.article.category?.toLowerCase() || 'news'}` },
+      { name: articleData.article.title, url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://thequiverindia.com'}/article/${articleData.article.slug}` },
+    ]
+    const breadcrumbStructuredData = generateBreadcrumbStructuredData(breadcrumbs)
+
     return (
-      <DynamicArticleDetailPage 
-        article={articleData.article}
-        authorInfo={articleData.author_info}
-        relatedArticles={relatedArticles}
-      />
+      <>
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleStructuredData) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbStructuredData) }}
+        />
+        
+        <DynamicArticleDetailPage 
+          article={articleData.article}
+          authorInfo={articleData.author_info}
+          relatedArticles={relatedArticles}
+        />
+      </>
     )
   } catch (error) {
     notFound()

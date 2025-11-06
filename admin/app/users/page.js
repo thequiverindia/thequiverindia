@@ -10,6 +10,7 @@ import toast from 'react-hot-toast'
 export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState('')
   const [editingUser, setEditingUser] = useState(null)
+  const [viewingHistory, setViewingHistory] = useState(null)
 
   const {
     data: usersResponse,
@@ -105,27 +106,42 @@ export default function UsersPage() {
           </button>
         </div>
 
-        {/* Filters */}
+        {/* Filters and Stats */}
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center space-x-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Filter by Role
-              </label>
-              <select
-                value={roleFilter}
-                onChange={(e) => {
-                  setRoleFilter(e.target.value)
-                }}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">All Roles</option>
-                <option value="user">User</option>
-                <option value="author">Author</option>
-                <option value="editor">Editor</option>
-                <option value="admin">Admin</option>
-              </select>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Filter by Role
+                </label>
+                <select
+                  value={roleFilter}
+                  onChange={(e) => {
+                    setRoleFilter(e.target.value)
+                  }}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">All Roles</option>
+                  <option value="user">User</option>
+                  <option value="author">Author</option>
+                  <option value="editor">Editor</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
             </div>
+            <div className="flex items-center space-x-4 text-sm">
+              <div className="flex items-center space-x-2">
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+                  {users.filter(u => u.role === 'user').length} Platform Users
+                </span>
+                <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold">
+                  {users.filter(u => ['admin', 'editor', 'author'].includes(u.role)).length} Staff
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="text-sm text-gray-600">
+            <p>👥 Showing all {users.length} users (Platform signups + Admin created)</p>
           </div>
         </div>
 
@@ -139,7 +155,7 @@ export default function UsersPage() {
                     User
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
+                    Role / Type
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -185,16 +201,26 @@ export default function UsersPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <select
-                        value={user.role}
-                        onChange={(e) => handleRoleChange(user, e.target.value)}
-                        className={`text-xs font-semibold px-2 py-1 rounded-full border-0 focus:ring-2 focus:ring-blue-500 ${getRoleColor(user.role)}`}
-                      >
-                        <option value="user">User</option>
-                        <option value="author">Author</option>
-                        <option value="editor">Editor</option>
-                        <option value="admin">Admin</option>
-                      </select>
+                      <div className="space-y-1">
+                        <select
+                          value={user.role}
+                          onChange={(e) => handleRoleChange(user, e.target.value)}
+                          className={`text-xs font-semibold px-2 py-1 rounded-full border-0 focus:ring-2 focus:ring-blue-500 ${getRoleColor(user.role)}`}
+                        >
+                          <option value="user">User</option>
+                          <option value="author">Author</option>
+                          <option value="editor">Editor</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                        {user.role === 'user' && (
+                          <div className="text-xs text-gray-500 flex items-center">
+                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                            </svg>
+                            Platform User
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -213,6 +239,13 @@ export default function UsersPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => setViewingHistory(user)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                          title="View login history"
+                        >
+                          History
+                        </button>
                         <button
                           onClick={() => setEditingUser(user)}
                           className="text-blue-600 hover:text-blue-900"
@@ -294,6 +327,14 @@ export default function UsersPage() {
             setEditingUser(null)
             refresh()
           }}
+        />
+      )}
+
+      {/* Login History Modal */}
+      {viewingHistory && (
+        <UserLoginHistoryModal
+          user={viewingHistory}
+          onClose={() => setViewingHistory(null)}
         />
       )}
     </AdminLayout>
@@ -578,6 +619,218 @@ function UserEditModal({ user, onClose, onSuccess }) {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function UserLoginHistoryModal({ user, onClose }) {
+  const [historyData, setHistoryData] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchLoginHistory()
+  }, [])
+
+  const fetchLoginHistory = async () => {
+    try {
+      setLoading(true)
+      const response = await usersAPI.getLoginHistory(user._id)
+      if (response.success) {
+        setHistoryData(response.data)
+      }
+    } catch (error) {
+      toast.error('Failed to load login history')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleRevokeSession = async (sessionIndex) => {
+    if (!window.confirm('Are you sure you want to revoke this session?')) {
+      return
+    }
+
+    try {
+      const response = await usersAPI.revokeSession(user._id, sessionIndex)
+      if (response.success) {
+        toast.success('Session revoked successfully')
+        fetchLoginHistory()
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to revoke session')
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Login History</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                {user.name} ({user.email})
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Last Login Info */}
+              {historyData?.user?.lastLogin && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-blue-900 mb-1">Last Login</h3>
+                  <p className="text-sm text-blue-700">
+                    {formatAdminDate(historyData.user.lastLogin)}
+                  </p>
+                </div>
+              )}
+
+              {/* Active Sessions */}
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3">Active Sessions</h3>
+                {historyData?.sessions && historyData.sessions.length > 0 ? (
+                  <div className="space-y-3">
+                    {historyData.sessions.map((session, index) => (
+                      <div
+                        key={index}
+                        className={`border rounded-lg p-4 ${
+                          session.isActive
+                            ? 'border-green-200 bg-green-50'
+                            : 'border-gray-200 bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <span
+                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                  session.isActive
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-gray-100 text-gray-800'
+                                }`}
+                              >
+                                {session.isActive ? 'Active' : 'Revoked'}
+                              </span>
+                            </div>
+                            <div className="space-y-1 text-sm">
+                              <div className="flex items-center text-gray-600">
+                                <span className="font-medium w-24">Created:</span>
+                                <span>{formatAdminDate(session.createdAt)}</span>
+                              </div>
+                              <div className="flex items-center text-gray-600">
+                                <span className="font-medium w-24">Expires:</span>
+                                <span>{formatAdminDate(session.expiresAt)}</span>
+                              </div>
+                              <div className="flex items-center text-gray-600">
+                                <span className="font-medium w-24">IP Address:</span>
+                                <span className="font-mono text-xs">{session.ipAddress || 'N/A'}</span>
+                              </div>
+                              {session.userAgent && (
+                                <div className="flex items-start text-gray-600">
+                                  <span className="font-medium w-24">Device:</span>
+                                  <span className="text-xs break-all">{session.userAgent}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          {session.isActive && (
+                            <button
+                              onClick={() => handleRevokeSession(index)}
+                              className="ml-4 px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+                            >
+                              Revoke
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-8">No active sessions</p>
+                )}
+              </div>
+
+              {/* Login History */}
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3">Login History</h3>
+                {historyData?.loginHistory && historyData.loginHistory.length > 0 ? (
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="max-h-96 overflow-y-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50 sticky top-0">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                              Time
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                              Status
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                              IP Address
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                              Device
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {historyData.loginHistory.map((login, index) => (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                {formatAdminDate(login.loginTime)}
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap text-sm">
+                                <span
+                                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                    login.success
+                                      ? 'bg-green-100 text-green-800'
+                                      : 'bg-red-100 text-red-800'
+                                  }`}
+                                >
+                                  {login.success ? 'Success' : 'Failed'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-mono">
+                                {login.ipAddress || 'N/A'}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">
+                                {login.userAgent || 'N/A'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-8">No login history available</p>
+                )}
+              </div>
+
+              {/* Close Button */}
+              <div className="flex justify-end pt-4 border-t">
+                <button
+                  onClick={onClose}
+                  className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

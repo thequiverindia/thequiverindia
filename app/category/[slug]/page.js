@@ -1,6 +1,7 @@
 import { fetchArticlesByCategory, fetchCategories } from '../../../lib/data'
 import CategoryPage from '../../../components/CategoryPage'
 import { notFound } from 'next/navigation'
+import { generateCategoryMetadata, generateBreadcrumbStructuredData } from '../../../lib/seo'
 
 export async function generateStaticParams() {
   const categories = await fetchCategories()
@@ -20,15 +21,7 @@ export async function generateMetadata({ params }) {
     }
   }
 
-  return {
-    title: `${category.name} News - TheQuiverIndia`,
-    description: `Latest ${category.name.toLowerCase()} news and updates from India. ${category.description}`,
-    openGraph: {
-      title: `${category.name} News - TheQuiverIndia`,
-      description: category.description,
-      type: 'website',
-    },
-  }
+  return generateCategoryMetadata(category)
 }
 
 export default async function CategoryPageContainer({ params, searchParams }) {
@@ -42,11 +35,26 @@ export default async function CategoryPageContainer({ params, searchParams }) {
 
   const articlesData = await fetchArticlesByCategory(category.name, page, 12)
 
+  // Generate breadcrumb structured data
+  const breadcrumbs = [
+    { name: 'Home', url: process.env.NEXT_PUBLIC_BASE_URL || 'https://thequiverindia.com' },
+    { name: category.name, url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://thequiverindia.com'}/category/${category.slug}` },
+  ]
+  const breadcrumbStructuredData = generateBreadcrumbStructuredData(breadcrumbs)
+
   return (
-    <CategoryPage
-      category={category}
-      articlesData={articlesData}
-      currentPage={page}
-    />
+    <>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbStructuredData) }}
+      />
+      
+      <CategoryPage
+        category={category}
+        articlesData={articlesData}
+        currentPage={page}
+      />
+    </>
   )
 }
